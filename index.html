@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Contractor Cost Estimator</title>
+	<style>
+		body {
+			font-family: Arial, sans-serif;
+			margin: 20px;
+		}
+		fieldset {
+			margin-bottom: 15px;
+			padding: 10px;
+		}
+		legend {
+			font-weight: bold;
+		}
+		label {
+			display: block;
+			margin-bottom: 5px;
+		}
+		#estimate, #implied-day-rate, #estimated-days {
+			color: green;
+			font-weight: bold;
+		}
+		.error {
+			color: red;
+			font-size: 0.9em;
+		}
+		@media (max-width: 600px) {
+			body {
+				margin: 10px;
+			}
+			.duration-container {
+				display: flex;
+				flex-direction: column;
+			}
+			.duration-container input,
+			.duration-container select {
+				margin-bottom: 10px;
+			}
+		}
+	</style>
+</head>
+<body>
+	<h2>Contractor Cost Estimator</h2>
+	<form id="estimator">
+		<!-- Services Selection -->
+		<fieldset>
+			<legend>Select Services:</legend>
+			<label><input type="checkbox" name="services" value="design"> UI/UX Design (Figma)</label>
+			<label><input type="checkbox" name="services" value="development"> Prototype Development (JavaScript, Airtable)</label>
+			<div id="service-error" class="error" style="display: none;">Please select at least one service.</div>
+		</fieldset>
+		
+		<!-- Intensity Selection -->
+		<fieldset>
+			<legend>Select Intensity Level:</legend>
+			<label>
+				<input type="radio" name="intensity" value="1.0" data-days="2" data-hours="3" checked>
+				1-2 Days per week (5-10 hrs/week)
+			</label>
+			<label>
+				<input type="radio" name="intensity" value="0.95" data-days="3" data-hours="5">
+				3 Days per week (15-20 hrs/week)
+			</label>
+			<label>
+				<input type="radio" name="intensity" value="0.90" data-days="5" data-hours="6">
+				4-5 Days per week (25-30 hrs/week)
+			</label>
+		</fieldset>
+		
+		<!-- Duration Input with Unit Selector -->
+		<fieldset>
+			<legend>Duration:</legend>
+			<div class="duration-container">
+				<!-- Moved Unit Selector Above Number Input -->
+				<label for="duration-unit-selector">Select Unit:</label>
+				<select id="duration-unit-selector" name="duration-unit">
+					<option value="weeks" selected>Weeks</option>
+					<option value="months">Months</option>
+				</select>
+				
+				<label for="duration">Number of <span id="duration-unit">weeks</span>:</label>
+				<input type="number" id="duration" name="duration" min="1" value="1">
+				<div id="duration-error" class="error" style="display: none;">Please enter a valid duration (minimum 1 week/month).</div>
+			</div>
+		</fieldset>
+		
+		<!-- Estimated Cost Display -->
+		<h3>Estimated Cost: $<span id="estimate">0.00</span></h3>
+		<p>Implied Day Rate: $<span id="implied-day-rate">0.00</span></p>
+		<p>Estimated Amount of Days Worked: <span id="estimated-days">0</span> days</p>
+	</form>
+	
+	<!-- JavaScript for Real-Time Calculation -->
+	<script>
+		// Service rates based on selection
+		const serviceRates = {
+			'design': 150,
+			'development': 180,
+			'both': 200
+		};
+
+		// Conversion factor
+		const MONTH_TO_WEEKS = 4;
+
+		// Update duration unit label based on selection
+		const durationUnitSelector = document.getElementById('duration-unit-selector');
+		const durationUnitLabel = document.getElementById('duration-unit');
+
+		durationUnitSelector.addEventListener('change', function() {
+			durationUnitLabel.textContent = this.value;
+			calculateEstimate();
+		});
+
+		document.getElementById('estimator').addEventListener('input', calculateEstimate);
+
+		function formatNumberWithCommas(number) {
+			return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+		}
+
+		function calculateEstimate() {
+			// Hide error messages
+			document.getElementById('service-error').style.display = 'none';
+			document.getElementById('duration-error').style.display = 'none';
+
+			// Get selected services
+			const selectedServices = Array.from(document.querySelectorAll('input[name="services"]:checked')).map(el => el.value);
+			
+			// Validate service selection
+			if (selectedServices.length === 0) {
+				document.getElementById('service-error').style.display = 'block';
+				document.getElementById('estimate').textContent = "0.00";
+				document.getElementById('implied-day-rate').textContent = "0.00";
+				document.getElementById('estimated-days').textContent = "0";
+				return;
+			}
+
+			// Determine the service rate
+			let ratePerHour = 0;
+			if (selectedServices.length === 2) {
+				ratePerHour = serviceRates['both'];
+			} else if (selectedServices.includes('design')) {
+				ratePerHour = serviceRates['design'];
+			} else if (selectedServices.includes('development')) {
+				ratePerHour = serviceRates['development'];
+			}
+
+			// Get intensity level
+			const intensityRadio = document.querySelector('input[name="intensity"]:checked');
+			const intensityMultiplier = parseFloat(intensityRadio.value);
+			const daysPerWeek = parseInt(intensityRadio.getAttribute('data-days'));
+			const hoursPerDay = parseInt(intensityRadio.getAttribute('data-hours'));
+
+			// Get duration and unit
+			const durationInput = document.getElementById('duration');
+			let durationValue = parseInt(durationInput.value);
+			const durationUnit = durationUnitSelector.value;
+
+			if (isNaN(durationValue) || durationValue < 1) {
+				document.getElementById('duration-error').style.display = 'block';
+				document.getElementById('estimate').textContent = "0.00";
+				document.getElementById('implied-day-rate').textContent = "0.00";
+				document.getElementById('estimated-days').textContent = "0";
+				return;
+			}
+
+			// Convert duration to weeks if necessary
+			let totalWeeks = durationValue;
+			if (durationUnit === 'months') {
+				totalWeeks = durationValue * MONTH_TO_WEEKS;
+			}
+
+			// Calculate total hours
+			const totalHoursPerWeek = daysPerWeek * hoursPerDay;
+			const totalHours = totalHoursPerWeek * totalWeeks;
+
+			// Calculate total cost
+			let totalCost = ratePerHour * totalHours;
+
+			// Apply intensity multiplier
+			totalCost *= intensityMultiplier;
+
+			// Calculate estimated amount of days worked
+			const estimatedDays = daysPerWeek * totalWeeks;
+
+			// Calculate implied day rate
+			let impliedDayRate = 0;
+			if (estimatedDays > 0) {
+				impliedDayRate = totalCost / estimatedDays;
+			}
+
+			// Format the total cost and implied day rate with thousand separators
+			const formattedTotalCost = formatNumberWithCommas(totalCost.toFixed(2));
+			const formattedImpliedDayRate = formatNumberWithCommas(impliedDayRate.toFixed(2));
+
+			// Display the estimated cost and additional information
+			document.getElementById('estimate').textContent = formattedTotalCost;
+			document.getElementById('implied-day-rate').textContent = formattedImpliedDayRate;
+			document.getElementById('estimated-days').textContent = estimatedDays;
+		}
+
+		// Initial calculation
+		calculateEstimate();
+	</script>
+</body>
+</html>
