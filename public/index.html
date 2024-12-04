@@ -1,108 +1,86 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+	<meta charset="UTF-8">
 	<title>Contractor Cost Estimator</title>
-	<style>
-		body {
-			font-family: Arial, sans-serif;
-			margin: 20px;
-		}
-		fieldset {
-			margin-bottom: 15px;
-			padding: 10px;
-		}
-		legend {
-			font-weight: bold;
-		}
-		label {
-			display: block;
-			margin-bottom: 5px;
-		}
-		#estimate, #implied-day-rate, #estimated-days {
-			color: green;
-			font-weight: bold;
-		}
-		.error {
-			color: red;
-			font-size: 0.9em;
-		}
-		@media (max-width: 600px) {
-			body {
-				margin: 10px;
-			}
-			.duration-container {
-				display: flex;
-				flex-direction: column;
-			}
-			.duration-container input,
-			.duration-container select {
-				margin-bottom: 10px;
-			}
-		}
-	</style>
+	<!-- Tailwind CSS CDN -->
+	<script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-	<h2>Contractor Cost Estimator</h2>
-	<form id="estimator">
-		<!-- Services Selection -->
-		<fieldset>
-			<legend>Select Services:</legend>
-			<label><input type="checkbox" name="services" value="design"> UI/UX Design (Figma)</label>
-			<label><input type="checkbox" name="services" value="development"> Prototype Development (JavaScript, Airtable)</label>
-			<div id="service-error" class="error" style="display: none;">Please select at least one service.</div>
-		</fieldset>
-		
-		<!-- Intensity Selection -->
-		<fieldset>
-			<legend>Select Intensity Level:</legend>
-			<!-- 
-				Intensity Level 1: Changed from 2 days/week to 1 day/week
-				Data-hours adjusted to maintain similar weekly hours
-			-->
-			<label>
-				<input type="radio" name="intensity" value="1" data-days="1" data-hours="6" checked>
-				1 Day per week (6 hrs/week)
-			</label>
-			<label>
-				<input type="radio" name="intensity" value="1" data-days="3" data-hours="6">
-				3 Days per week (15 hrs/week)
-			</label>
-			<label>
-				<input type="radio" name="intensity" value="1" data-days="5" data-hours="6">
-				5 Days per week (30 hrs/week)
-			</label>
-		</fieldset>
-		
-		<!-- Duration Input with Unit Selector -->
-		<fieldset>
-			<legend>Duration:</legend>
-			<div class="duration-container">
-				<!-- Moved Unit Selector Above Number Input -->
-				<label for="duration-unit-selector">Select Unit:</label>
-				<select id="duration-unit-selector" name="duration-unit">
-					<option value="weeks" selected>Weeks</option>
-					<option value="months">Months</option>
-				</select>
-				
-				<label for="duration">Number of <span id="duration-unit">weeks</span>:</label>
-				<input type="number" id="duration" name="duration" min="1" value="1">
-				<div id="duration-error" class="error" style="display: none;">Please enter a valid duration (minimum 1 week/month).</div>
+<body class="bg-gray-100 text-gray-800 min-h-screen flex items-center justify-center p-4">
+	<div class="w-full max-w-2xl bg-white p-6 rounded-lg shadow-md">
+		<h2 class="text-2xl font-bold mb-6 text-center">Contractor Cost Estimator</h2>
+		<form id="estimator">
+			<!-- Services Selection -->
+			<fieldset class="mb-6">
+				<legend class="text-lg font-semibold mb-4">Select Services:</legend>
+				<div class="flex flex-col space-y-2">
+					<label class="flex items-center">
+						<input type="checkbox" name="services" value="design" class="form-checkbox h-5 w-5 text-blue-600">
+						<span class="ml-2">UI/UX Design (Figma)</span>
+					</label>
+					<label class="flex items-center">
+						<input type="checkbox" name="services" value="development" class="form-checkbox h-5 w-5 text-blue-600">
+						<span class="ml-2">Prototype Development (JavaScript, Airtable)</span>
+					</label>
+				</div>
+				<div id="service-error" class="text-red-500 text-sm mt-2 hidden">Please select at least one service.</div>
+			</fieldset>
+			
+			<!-- Intensity Selection -->
+			<fieldset class="mb-6">
+				<legend class="text-lg font-semibold mb-4">Select Intensity Level:</legend>
+				<div class="flex flex-col space-y-2">
+					<label class="flex items-center">
+						<input type="radio" name="intensity" value="1" data-days="1" data-hours="6" checked class="form-radio h-5 w-5 text-blue-600">
+						<span class="ml-2">1 Day per week (6 hrs/week)</span>
+					</label>
+					<label class="flex items-center">
+						<input type="radio" name="intensity" value="1" data-days="3" data-hours="6" class="form-radio h-5 w-5 text-blue-600">
+						<span class="ml-2">3 Days per week (15 hrs/week)</span>
+					</label>
+					<label class="flex items-center">
+						<input type="radio" name="intensity" value="1" data-days="5" data-hours="6" class="form-radio h-5 w-5 text-blue-600">
+						<span class="ml-2">5 Days per week (30 hrs/week)</span>
+					</label>
+				</div>
+			</fieldset>
+			
+			<!-- Duration Input with Unit Selector -->
+			<fieldset class="mb-6">
+				<legend class="text-lg font-semibold mb-4">Duration:</legend>
+				<div class="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
+					<div class="flex flex-col sm:flex-1">
+						<label for="duration-unit-selector" class="mb-2">Select Unit:</label>
+						<select id="duration-unit-selector" name="duration-unit" class="form-select mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+							<option value="weeks" selected>Weeks</option>
+							<option value="months">Months</option>
+						</select>
+					</div>
+					
+					<div class="flex flex-col sm:flex-1 mt-4 sm:mt-0">
+						<label for="duration" class="mb-2">Number of <span id="duration-unit">weeks</span>:</label>
+						<input type="number" id="duration" name="duration" min="1" value="1" class="form-input mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+						<div id="duration-error" class="text-red-500 text-sm mt-2 hidden">Please enter a valid duration (minimum 1 week/month).</div>
+					</div>
+				</div>
+			</fieldset>
+			
+			<!-- Estimated Cost Display -->
+			<div class="bg-green-50 p-4 rounded-lg">
+				<h3 class="text-xl font-semibold mb-2">Estimated Cost: $<span id="estimate" class="text-green-600">0.00</span></h3>
+				<p>Day Rate: $<span id="implied-day-rate" class="text-green-600">0.00</span></p>
+				<p>Days Worked: <span id="estimated-days" class="text-green-600">0</span> days</p>
 			</div>
-		</fieldset>
-		
-		<!-- Estimated Cost Display -->
-		<h3>Estimated Cost: $<span id="estimate">0.00</span></h3>
-		<p>Day Rate: $<span id="implied-day-rate">0.00</span></p>
-		<p>Days Worked: <span id="estimated-days">0</span> days</p>
-	</form>
+		</form>
+	</div>
 	
 	<!-- JavaScript for Real-Time Calculation -->
 	<script>
 		// Service rates based on selection
 		const serviceRates = {
-			'design': 175,
-			'development': 200,
-			'both': 225
+			'design': 180,
+			'development': 220,
+			'both': 250
 		};
 
 		// Conversion factor
@@ -125,15 +103,15 @@
 
 		function calculateEstimate() {
 			// Hide error messages
-			document.getElementById('service-error').style.display = 'none';
-			document.getElementById('duration-error').style.display = 'none';
+			document.getElementById('service-error').classList.add('hidden');
+			document.getElementById('duration-error').classList.add('hidden');
 
 			// Get selected services
 			const selectedServices = Array.from(document.querySelectorAll('input[name="services"]:checked')).map(el => el.value);
 			
 			// Validate service selection
 			if (selectedServices.length === 0) {
-				document.getElementById('service-error').style.display = 'block';
+				document.getElementById('service-error').classList.remove('hidden');
 				document.getElementById('estimate').textContent = "0.00";
 				document.getElementById('implied-day-rate').textContent = "0.00";
 				document.getElementById('estimated-days').textContent = "0";
@@ -162,7 +140,7 @@
 			const durationUnit = durationUnitSelector.value;
 
 			if (isNaN(durationValue) || durationValue < 1) {
-				document.getElementById('duration-error').style.display = 'block';
+				document.getElementById('duration-error').classList.remove('hidden');
 				document.getElementById('estimate').textContent = "0.00";
 				document.getElementById('implied-day-rate').textContent = "0.00";
 				document.getElementById('estimated-days').textContent = "0";
