@@ -55,17 +55,21 @@
 		<!-- Intensity Selection -->
 		<fieldset>
 			<legend>Select Intensity Level:</legend>
+			<!-- 
+				Intensity Level 1: Changed from 2 days/week to 1 day/week
+				Data-hours adjusted to maintain similar weekly hours
+			-->
 			<label>
-				<input type="radio" name="intensity" value="1.0" data-days="2" data-hours="3" checked>
-				1-2 Days per week (5-10 hrs/week)
+				<input type="radio" name="intensity" value="1.2" data-days="1" data-hours="6" checked>
+				1 Day per week (6 hrs/week)
 			</label>
 			<label>
-				<input type="radio" name="intensity" value="0.95" data-days="3" data-hours="5">
-				3 Days per week (15-20 hrs/week)
+				<input type="radio" name="intensity" value="1.0" data-days="3" data-hours="6">
+				3 Days per week (15 hrs/week)
 			</label>
 			<label>
-				<input type="radio" name="intensity" value="0.90" data-days="5" data-hours="6">
-				4-5 Days per week (25-30 hrs/week)
+				<input type="radio" name="intensity" value="0.9" data-days="5" data-hours="6">
+				5 Days per week (30 hrs/week)
 			</label>
 		</fieldset>
 		
@@ -88,8 +92,8 @@
 		
 		<!-- Estimated Cost Display -->
 		<h3>Estimated Cost: $<span id="estimate">0.00</span></h3>
-		<p>Implied Day Rate: $<span id="implied-day-rate">0.00</span></p>
-		<p>Estimated Amount of Days Worked: <span id="estimated-days">0</span> days</p>
+		<p>Day Rate: $<span id="implied-day-rate">0.00</span></p>
+		<p>Days Worked: <span id="estimated-days">0</span> days</p>
 	</form>
 	
 	<!-- JavaScript for Real-Time Calculation -->
@@ -176,10 +180,7 @@
 			const totalHours = totalHoursPerWeek * totalWeeks;
 
 			// Calculate total cost
-			let totalCost = ratePerHour * totalHours;
-
-			// Apply intensity multiplier
-			totalCost *= intensityMultiplier;
+			let totalCost = ratePerHour * totalHours * intensityMultiplier;
 
 			// Calculate estimated amount of days worked
 			const estimatedDays = daysPerWeek * totalWeeks;
